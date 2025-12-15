@@ -1,0 +1,190 @@
+---
+alwaysApply: true
+---
+
+# Svelte 5 Development Guidelines
+
+## 🚨 CRITICAL: Always Use Svelte MCP and Svelte 5 Runes
+
+**ALL Svelte/SvelteKit development MUST follow these rules:**
+
+### 🔍 **Before Any Svelte Code Changes:**
+
+1. **ALWAYS** call `mcp_svelte_list-sections` first to see available documentation
+2. **ALWAYS** call `mcp_svelte_get-documentation` with relevant sections before implementing
+3. **NEVER** implement Svelte code without consulting current Svelte 5 documentation
+
+### 🏗️ **Svelte 5 Runes Usage (MANDATORY):**
+
+#### State Management
+
+```typescript
+// ✅ CORRECT: Use $state rune
+export const userState = $state<User | null>(null);
+export const isLoading = $state(false);
+
+// ❌ WRONG: Never use legacy stores
+// const userStore = writable<User | null>(null);
+```
+
+#### Reactive Statements
+
+```svelte
+<script>
+	let count = $state(0);
+	let doubled = $derived(count * 2);
+
+	// ✅ CORRECT: Use $effect for side effects
+	$effect(() => {
+		console.log('Count changed:', count);
+	});
+
+	// ❌ WRONG: Never use reactive statements
+	// $: console.log('Count changed:', count);
+	// $: doubled = count * 2;
+</script>
+```
+
+#### Component Props
+
+```svelte
+<script>
+	// ✅ CORRECT: Use $props rune
+	let { title, items = $bindable() } = $props<{
+		title: string;
+		items?: string[];
+	}>();
+
+	// ❌ WRONG: Never use export let
+	// export let title: string;
+	// export let items: string[] = [];
+</script>
+```
+
+#### Template Syntax
+
+```svelte
+<!-- ✅ CORRECT: Use {@render ...} -->
+{@render children()}
+
+<!-- ❌ WRONG: Never use <slot /> -->
+<!-- <slot /> -->
+```
+
+### 📚 **Documentation Lookup Process:**
+
+1. **Identify the task** (e.g., "implement form validation")
+2. **Call `mcp_svelte_list-sections`** to see all available docs
+3. **Analyze use_cases** to find relevant sections
+4. **Call `mcp_svelte_get-documentation`** with ALL relevant sections
+5. **Read and understand** the documentation thoroughly
+6. **Implement using** the documented patterns
+
+### 🔄 **Migration Checklist:**
+
+When working with existing code:
+
+- [ ] Replace `writable()` stores with `$state`
+- [ ] Replace `$store` syntax with direct state access
+- [ ] Replace `$:` reactive statements with `$effect` or `$derived`
+- [ ] Replace `export let` with `$props`
+- [ ] Replace `<slot />` with `{@render children()}`
+- [ ] Remove `import { writable } from 'svelte/store'`
+
+### 🛠️ **Tools to Use:**
+
+- `mcp_svelte_list-sections` - List all available documentation
+- `mcp_svelte_get-documentation` - Get specific documentation sections
+- `mcp_svelte_svelte-autofixer` - Fix Svelte code issues
+- `mcp_svelte_playground-link` - Create playground links for testing
+
+### ⚠️ **Red Flags (DO NOT DO):**
+
+- Using `writable()`, `readable()`, `derived()` from `svelte/store`
+- Using `$storeName` syntax in templates
+- Using `$:` reactive statements
+- Using `export let` for props
+- Using `<slot />` in templates
+- Implementing without checking documentation first
+
+### 📋 **Implementation Steps:**
+
+1. **Read the task** and understand requirements
+2. **Call `mcp_svelte_list-sections`** to explore docs
+3. **Identify relevant sections** from use_cases
+4. **Call `mcp_svelte_get-documentation`** with selected sections
+5. **Study the documentation** carefully
+6. **Implement using Svelte 5 patterns**
+7. **Run `mcp_svelte_svelte-autofixer`** to validate code
+8. **Test the implementation**
+
+### 🎯 **Quality Assurance:**
+
+After implementation:
+
+- Run `bun run build` to ensure compilation
+- Run `bun run lint` for code quality
+- Run `bun run test` for functionality
+- Use `mcp_svelte_svelte-autofixer` to check for issues
+
+---
+
+## 📚 shadcn-svelte
+
+Project uses **shadcn-svelte** as UI component library. Instead of storing documentation in rules, use MCP shadcn-svelte tools to get context directly from the website.
+
+### 🎨 Important: Colors are pre-configured globally in `src/global.css`
+
+**DO NOT add inline color configuration** to generated components. All colors (primary, secondary, destructive, muted, etc.) are already defined in CSS variables and applied via Tailwind utility classes.
+
+### 🔍 Before Using shadcn-svelte Components:
+
+1. **ALWAYS** call `mcp_shadcn-svelte_shadcnSvelteListTool` to see list of available components/blocks/charts/docs
+2. **ALWAYS** call `mcp_shadcn-svelte_shadcnSvelteGetTool` to get detailed information about component before implementing
+3. **ALWAYS** call `mcp_shadcn-svelte_shadcnSvelteSearchTool` to find components suitable for use case
+4. **NEVER** implement shadcn-svelte components without consulting MCP tools first
+5. **REMOVE any inline color definitions** from generated code - use Tailwind classes instead (e.g., `text-primary`, `bg-secondary`, `border-muted`)
+
+### 🛠️ MCP shadcn-svelte Tools:
+
+- `mcp_shadcn-svelte_shadcnSvelteListTool` - List all available components, blocks, charts, docs
+- `mcp_shadcn-svelte_shadcnSvelteGetTool` - Get detailed information about specific component/block/chart/doc
+- `mcp_shadcn-svelte_shadcnSvelteSearchTool` - Search components/blocks/charts/docs by keyword
+- `mcp_shadcn-svelte_shadcnSvelteIconsTool` - Search and browse Lucide icons
+
+### 📋 Workflow when using shadcn-svelte:
+
+1. **When needing a new component:**
+   - Call `mcp_shadcn-svelte_shadcnSvelteSearchTool` with query describing needed component
+   - Review results and select suitable component
+   - Call `mcp_shadcn-svelte_shadcnSvelteGetTool` with component name to get code and documentation
+   - Implement component according to code example from MCP
+
+2. **When searching for component:**
+   - Call `mcp_shadcn-svelte_shadcnSvelteListTool` to see all options
+   - Filter by type (components, blocks, charts, docs)
+   - Use search tool if need to find specific one
+
+3. **When needing icons:**
+   - Call `mcp_shadcn-svelte_shadcnSvelteIconsTool` with query describing icon
+   - Browse results and select suitable icon
+
+### ⚠️ Important Notes:
+
+- **SVELTE ONLY**: These MCP tools are only for Svelte components, DO NOT use React-specific props like `asChild`
+- **Svelte 5**: All components must follow Svelte 5 patterns (use `$props`, `$state`, `$derived`, `$effect`)
+- **Tailwind v4**: Project uses Tailwind v4, ensure code from MCP is compatible
+- **No Comments**: Code from MCP will be implemented without comments according to project rules
+
+### 🎯 Example Workflow:
+
+```
+Task: "Create login form with Input and Button"
+
+1. Call mcp_shadcn-svelte_shadcnSvelteSearchTool("input button form")
+2. Review results, identify Input and Button components
+3. Call mcp_shadcn-svelte_shadcnSvelteGetTool("input", "component")
+4. Call mcp_shadcn-svelte_shadcnSvelteGetTool("button", "component")
+5. Implement components according to code examples, adapt for Svelte 5 patterns
+6. Remove all comments from code
+```

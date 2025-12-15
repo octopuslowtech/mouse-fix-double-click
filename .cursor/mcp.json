@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "svelte": {
+      "command": "npx",
+      "args": ["-y", "@sveltejs/mcp"]
+    },
+    "shadcn-svelte": {
+      "command": "bunx",
+      "args": ["@binsarjr/shadcn-svelte-mcp"],
+      "env": {}
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}
