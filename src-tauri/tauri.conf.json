@@ -14,7 +14,7 @@
       {
         "title": "Mouse Fix Double Click",
         "width": 650,
-        "height": 600,
+        "height": 500,
         "resizable": true,
         "fullscreen": false,
         "backgroundColor": "#0f172a"

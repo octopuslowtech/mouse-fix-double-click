@@ -6,6 +6,7 @@
 	import {
 		startFilter,
 		stopFilter,
+		updateFilterThreshold,
 		queryFilterStatus,
 		subscribeFilterEvents,
 		type FilterStatus,
@@ -26,7 +27,7 @@
 		if (reason && typeof reason === 'object' && 'message' in reason) {
 			return String((reason as { message: unknown }).message ?? 'Unknown error');
 		}
-		return 'Đã xảy ra lỗi không xác định';
+		return 'An unknown error occurred';
 	};
 
 	const clampThreshold = (value: number) => {
@@ -87,6 +88,24 @@
 		}
 	};
 
+	const handleThresholdChange = async (value: number) => {
+		if (busy) {
+			return;
+		}
+		const next = clampThreshold(value);
+		threshold = next;
+		busy = true;
+		errorText = null;
+		try {
+			const payload = await updateFilterThreshold(next);
+			applyStatus(payload);
+		} catch (error) {
+			errorText = parseError(error);
+		} finally {
+			busy = false;
+		}
+	};
+
 	onMount(() => {
 		let isActive = true;
 		refreshStatus();
@@ -110,16 +129,17 @@
 		};
 	});
 
-	const statusLabel = $derived(status.running ? 'Đang chặn double click' : 'Đang tắt');
-	const autoLabel = $derived(autostart ? 'Khởi động cùng hệ thống' : 'Không tự khởi động');
+	const statusLabel = $derived(status.running ? 'Blocking double click' : 'Off');
+	const autoLabel = $derived(autostart ? 'Launch at system startup' : 'Do not launch on startup');
 	const baseId = $props.id();
 	const headingId = baseId;
 	const filterId = `${baseId}-filter`;
 	const autoId = `${baseId}-auto`;
+	const thresholdId = `${baseId}-threshold`;
 </script>
 
 <div class="mx-auto flex w-full max-w-xl flex-col gap-3 px-3 py-4 text-white">
-	<p id={headingId} class="text-xl font-semibold">Fix double click mouse</p>
+	<p id={headingId} class="text-xl font-semibold">Fix mouse double-click</p>
 	<div class="relative flex w-full items-start gap-2 rounded-md border border-slate-800 bg-slate-900/70 p-3 shadow-sm outline-none">
 		<Switch
 			id={filterId}
@@ -133,13 +153,30 @@
 			<MousePointerClick class="size-6 text-emerald-300" />
 			<div class="grid grow gap-2">
 				<Label id={`${filterId}-title`} for={filterId} class="text-base font-semibold text-white">
-					Bật chặn double click
+					Enable double-click filter
 				</Label>
 				<p id={`${filterId}-description`} class="text-xs text-slate-400">
-					Trạng thái: {statusLabel}
+					Status: {statusLabel}
 				</p>
 			</div>
 		</div>
+	</div>
+	<div class="space-y-2 rounded-md border border-slate-800 bg-slate-900/70 p-3 shadow-sm">
+		<div class="flex items-center justify-between gap-2">
+			<Label for={thresholdId} class="text-sm text-slate-200">Time threshold</Label>
+			<span class="text-sm font-semibold text-white">{threshold} ms</span>
+		</div>
+		<input
+			id={thresholdId}
+			type="range"
+			min="50"
+			max="500"
+			step="10"
+			bind:value={threshold}
+			disabled={busy}
+			onchange={(event) => handleThresholdChange(Number(event.currentTarget.value))}
+			class="w-full accent-emerald-500"
+		/>
 	</div>
 	<div class="relative flex w-full items-start gap-2 rounded-md border border-slate-800 bg-slate-900/70 p-3 shadow-sm outline-none">
 		<Switch
@@ -154,10 +191,10 @@
 			<Rocket class="size-6 text-sky-300" />
 			<div class="grid grow gap-2">
 				<Label id={`${autoId}-title`} for={autoId} class="text-base font-semibold text-white">
-					Khởi động cùng hệ thống
+					Launch at system startup
 				</Label>
 				<p id={`${autoId}-description`} class="text-xs text-slate-400">
-					Trạng thái: {autoLabel}
+					Status: {autoLabel}
 				</p>
 			</div>
 		</div>
